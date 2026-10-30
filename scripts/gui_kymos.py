@@ -6,7 +6,10 @@ from PIL import Image, ImageTk
 import cv2
 
 class KymographClassifier:
-    def __init__(self, image_dir, metadata_dir, csv_path, output_csv_path):
+    def __init__(self, image_dir, metadata_dir, csv_path, output_csv_path, pix_um=2.44, fps=None):
+        """pix_um: kymograph rows per um; fps: frame rate for every kymograph (default: read from the metadata Excel)."""
+        self.pix_um = pix_um
+        self.fps = fps
         self.image_dir = image_dir
         self.metadata_dir = metadata_dir
         self.csv_path = csv_path
@@ -37,6 +40,8 @@ class KymographClassifier:
         return f"set01_{row['Participant']}_{row['Date']}_{row['Location']}_{row['Video']}_kymograph_{row['Capillary']}.tiff"
 
     def get_fps(self, participant, date, location, video):
+        if self.fps is not None:
+            return self.fps
         filename = f'{participant}_{int(date)}.xlsx'
         df = pd.read_excel(os.path.join(self.metadata_dir, filename))
         row = df[(df['Participant'] == participant) & (df['Date'] == date) & (df['Video'] == video)]
@@ -57,11 +62,11 @@ class KymographClassifier:
             print(self.df.loc[self.index, 'Participant'], self.df.loc[self.index, 'Date'], self.df.loc[self.index, 'Location'], self.df.loc[self.index, 'Video'])
             print(um_slope)
             print(fps)
-            average_slope = (um_slope * 2.44) / fps
+            average_slope = (um_slope * self.pix_um) / fps
             self.original_velocity = um_slope
         else:
             velocities = self.additional_velocities if self.use_additional_velocities else self.high_velocities
-            average_slope = (velocities[self.current_velocity_index] * 2.44) / fps
+            average_slope = (velocities[self.current_velocity_index] * self.pix_um) / fps
         if self.inverted_slope:
             average_slope = -average_slope
         if average_slope != 0:
