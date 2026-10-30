@@ -54,6 +54,7 @@ def compute_average_surrounding_pixels(image_stack, radius=4, circle = True):
         averaged_stack (np.ndarray): 3D image stack of shape (time, row, col)
     """
     # Convert the image stack to float32 type for accurate calculations
+    input_dtype = np.asarray(image_stack).dtype
     image_stack = np.float32(image_stack)
 
     if circle:
@@ -67,8 +68,11 @@ def compute_average_surrounding_pixels(image_stack, radius=4, circle = True):
     # Perform 3D convolution to compute the average of the surrounding pixels
     averaged_stack = convolve(image_stack, kernel[np.newaxis, :, :])
 
-    # Convert the averaged stack back to the original data type (e.g., uint8)
-    averaged_stack = np.uint8(averaged_stack)
+    # Convert the averaged stack back to the original data type (e.g., uint8).
+    # Float input (e.g. linearized 12-bit frames) stays float32 so low-contrast
+    # data keeps its precision.
+    if np.issubdtype(input_dtype, np.integer):
+        averaged_stack = averaged_stack.astype(input_dtype)
 
     return averaged_stack
 def build_centerline_vs_time_kernal(image, centerline_coords, long = True):

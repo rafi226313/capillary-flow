@@ -1,0 +1,29 @@
+# pip environment for macOS (Apple silicon) covering the core pipeline:
+# loading, centerlines, kymographs, velocities and the analysis stack.
+#
+#   /opt/homebrew/bin/python3.13 -m venv .venv
+#   .venv/bin/python -m pip install -r requirements_mac.txt
+#   .venv/bin/python -m pip install -e . --config-settings editable_mode=compat
+#   .venv/bin/python -m pytest tests
+#
+# Tested 2026-10-29 with Python 3.13.3, numpy 2.5.4, scipy 1.18.1,
+# scikit-image 0.26.0, opencv-python 4.14.0.94, pandas 3.1.0, fil_finder 1.8.
+numpy>=2.1
+scipy>=1.14
+pandas>=2.2
+matplotlib>=3.9
+seaborn>=0.13
+scikit-image>=0.24
+scikit-learn>=1.5
+# OpenCV 5 returns HoughLinesP lines as (N, 4); find_slopes_hough expects (N, 1, 4)
+opencv-python>=4.10,<5
+tifffile>=2024.8
+pillow>=10.4
+imageio>=2.35
+networkx>=3.3
+statsmodels>=0.14
+pyyaml>=6
+openpyxl>=3.1
+astropy>=6.1
+fil_finder>=1.7
+pytest>=8

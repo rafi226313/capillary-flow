@@ -64,7 +64,12 @@ def save_manuscript_figure(fig, output_dir: str, filename: str, dpi: int = None,
 
 def get_paths():
     """Get system-specific paths based on hostname.
-    
+
+    Unknown hosts use the HPC paths when they exist, otherwise this
+    checkout's own folder and the user's Downloads folder, so a fresh
+    clone imports on any machine (e.g. a Mac whose hostname changes
+    with the network).
+
     Returns:
         dict: Dictionary containing paths for the current system
     """
@@ -97,7 +102,12 @@ def get_paths():
         'cap_flow': "/hpc/projects/capillary-flow",
         'downloads': "/home/downloads"
     }
-    
+    if not os.path.isdir(default_paths['cap_flow']):
+        default_paths = {
+            'cap_flow': os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+            'downloads': os.path.join(os.path.expanduser('~'), 'Downloads')
+        }
+
     # Determine paths based on hostname
     paths = computer_paths.get(hostname, default_paths)
     
@@ -124,10 +134,13 @@ def load_source_sans():
     Returns:
         FontProperties: Font properties for Source Sans
 """
- # Try to use Source Sans font if available, otherwise use default
-    try:
-        source_sans = FontProperties(fname=os.path.join(PATHS['downloads'], 'Source_Sans_3\\static\\SourceSans3-Regular.ttf'))
-    except:
+ # Try to use Source Sans font if available, otherwise use default.
+ # FontProperties doesn't check the file, so test for it here; a missing
+ # font would otherwise only fail later, when a figure is drawn.
+    font_path = os.path.join(PATHS['downloads'], 'Source_Sans_3', 'static', 'SourceSans3-Regular.ttf')
+    if os.path.isfile(font_path):
+        source_sans = FontProperties(fname=font_path)
+    else:
         print("Source Sans font not found, using default font")
         source_sans = None
     return source_sans
