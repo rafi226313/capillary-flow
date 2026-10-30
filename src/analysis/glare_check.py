@@ -207,6 +207,9 @@ def main() -> None:
                   f'{100 * res["glare_share_p10_p90"][0]:.0f}-{100 * res["glare_share_p10_p90"][1]:.0f}%)')
         if 'scope_glare_share' in res:
             print(f'  of which inside the scope {100 * res["scope_glare_share"]:.0f}%')
+        if 'dip_measured_median' not in res:
+            print('  no capillaries found: check focus and that the finger is on the oil, then recapture')
+            continue
         print(f'  dip depth as measured: median {100 * res["dip_measured_median"]:.1f}%, '
               f'90th percentile {100 * res["dip_measured_p90"]:.1f}%')
         if 'dip_glare_free_median' in res:
